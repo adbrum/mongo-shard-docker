@@ -49,6 +49,7 @@ services:
     command: mongod --port 27020 --shardsvr --replSet shard03 --noprealloc --smallfiles --oplogSize 16
     volumes:
       - ./scripts:/scripts
+
   ## Router
   router:
     image: mongo
@@ -67,4 +68,3 @@ services:
       - shard02b
       - shard03a
       - shard03b
-
