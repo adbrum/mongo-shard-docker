@@ -1,0 +1,198 @@
+//Quantidade de filmes na biblioteca
+db.movies.count()
+
+//Saber quais os generos de filme exisem na biblioteca
+db.movies.aggregate([
+    {$match: {}},
+    { $group : { _id : "$genres" }},
+    {$sort: {_id: 1}}
+]).pretty()
+
+//Informar qual o genero do filme a procurar
+db.movies.aggregate([
+    {$match: {genres: "Animation"}},
+    {$project: {
+        genero: '$genres',
+        title: "$title",
+        _id: 0,
+    }}
+]).pretty()
+
+//Informar que tipo de genenero aravés do nomeo do filme
+db.getCollection('movies').aggregate([
+    { $match: { title: "Toy Story (1995)" } },
+    {$project: {
+        _id: 0,
+        userId: 0
+    }},
+    {
+        $lookup: {
+        from: 'tags',
+        localField: 'title',
+        foreignField: 'movieId',
+        as: 'movie_',
+        }
+    }
+]).pretty()
+
+//Informar como o filme está etiquetado
+db.tags.aggregate([
+    { $limit : 10 },
+    {$project: {
+        _id: 0,
+        userId: 0
+    }},
+    {
+        $lookup: {
+        from: 'movies',
+        localField: 'tag',
+        foreignField: 'movieId',
+        as: 'tag_',
+        }
+    },
+    {
+      $unwind: "$tag"
+   }
+]).pretty()
+
+/*db.getCollection('tags').aggregate([
+    { $limit : 10 },
+     {$project: {
+        _id: 0,
+        userId: 0
+    }},
+   {
+      $unwind: "$tag"
+   },
+   {
+    $lookup:
+        {
+            from: "movies",
+            localField: "tags",
+            foreignField : "_id",
+            as: "tag_ordem"
+        }
+    }
+]).pretty()*/
+
+//Saber Nome do filme e seu genero
+db.movies.aggregate([
+    { $limit : 10 },
+    {$project: {
+        _id: 0,
+        userId: 0
+    }},
+    {
+        $lookup: {
+        from: 'tags',
+        localField: 'title',
+        foreignField: 'movieId',
+        as: 'movie_',
+        }
+    }
+]).pretty()
+
+//Gerar o rating dos filmes
+db.ratings.aggregate([
+    //{ $limit : 100 },// Limitar
+   {$project: {
+        _id: 0,
+        userId: 0
+    }},
+    {
+        $lookup: {
+        from: 'tags',
+        localField: 'movieId',
+        foreignField: 'movieId',
+        as: 'tag',
+        }
+    },
+    { $out : "rating_movies" } 
+]).pretty()
+
+//Saber o rating dos filmes
+db.rating_movies.aggregate([
+    { $limit : 100 },
+    {$project: {
+        _id: 0,
+        userId: 0,
+        timestamp: 0,
+        "tag._id": 0,
+       /* "tag.movieId": 0,
+        "tag.timestamp": 0,*/
+    }},
+    {
+        $lookup: {
+        from: 'movies',
+        localField: 'rating',
+        foreignField: 'title',
+        as: 'title',
+        }
+    }
+]).pretty()
+
+
+//Saber qual a classificação do filme
+db.ratings.aggregate([
+    {$project: {
+        _id: 0,
+        userId: 0,
+        movieId: 0,
+        timestamp: 0
+    }},
+    {
+        $lookup: {
+        from: 'movies',
+        localField: 'rating',
+        foreignField: 'title',
+        as: 'title',
+        }
+    }
+]).pretty()
+
+db.rating_movies.aggregate([
+    //{$match: {movieId: 3893}},
+    ///{$group: {_id: "$movieId", total: {$avg: "$rating"}}},
+    {$project: {
+        _id: 0,
+        "tag._id": 0,
+        "tag.movieId": 0,
+        "tag.timestamp": 0,
+        timestamp: 0
+    }},
+    {
+        $lookup: {
+        from: 'rating',
+        localField: 'tag.userId',
+        foreignField: 'movieId',
+        as: 'rating_movies',
+        }
+    }
+]).pretty()
+
+
+db.links.aggregate([
+    { $limit : 10 },
+    {$project: {
+        _id: 0,
+        //movieId: 0
+    }},
+    {
+        $lookup: {
+        from: 'movies',
+        localField: 'movieId',
+        foreignField: 'movieId',
+        as: 'movie_data',
+        }
+    }
+]).pretty()
+
+//Teste Reduce
+db.tags.mapReduce(
+   function() { emit(this.timestamp,1); }, 
+	
+   function(key, values) {return Array.sum(values)}, {  
+      query:{movieId:"1"},  
+      out:"post_total" 
+   }
+)
