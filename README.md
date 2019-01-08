@@ -6,6 +6,8 @@ Designed to be quick and simple to get a local or test environment up and runnin
 
 Heavily inspired by [https://github.com/jfollenfant/mongodb-sharding-docker-compose](https://github.com/jfollenfant/mongodb-sharding-docker-compose)
 
+mongoDB Documentacion [https://docs.mongodb.com/manual/tutorial/convert-replica-set-to-replicated-shard-cluster/](https://docs.mongodb.com/manual/tutorial/convert-replica-set-to-replicated-shard-cluster/)
+
 ### Mongo Components
 
 * Config Server (3 member replica set): `config01`,`config02`,`config03`
@@ -145,7 +147,10 @@ mongos> db.stats()
 ```
 
 ### Normal Startup
-The cluster only has to be initialized on the first run. Subsequent startup can be achieved simply with `docker-compose up` or `docker-compose up -d`
+The cluster only has to be initialized on the first run. Subsequent startup can be achieved simply with
+```
+docker-compose up or docker-compose up -d
+```
 
 ### In consol
 Its as simple as:
