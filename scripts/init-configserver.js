@@ -1,3 +1,4 @@
+
 rs.initiate(
    {
       _id: "configserver",
@@ -10,7 +11,6 @@ rs.initiate(
       ]
    }
 )
-
 
 //sh.enableSharding()
 //sh.enableAutoSplit()
