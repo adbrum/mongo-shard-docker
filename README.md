@@ -6,7 +6,7 @@ Designed to be quick and simple to get a local or test environment up and runnin
 
 Heavily inspired by [https://github.com/jfollenfant/mongodb-sharding-docker-compose](https://github.com/jfollenfant/mongodb-sharding-docker-compose)
 
-mongoDB Documentacion [https://docs.mongodb.com/manual/tutorial/convert-replica-set-to-replicated-shard-cluster/](https://docs.mongodb.com/manual/tutorial/convert-replica-set-to-replicated-shard-cluster/)
+mongoDB Documentation [https://docs.mongodb.com/manual/tutorial/convert-replica-set-to-replicated-shard-cluster/](https://docs.mongodb.com/manual/tutorial/convert-replica-set-to-replicated-shard-cluster/)
 
 ### Mongo Components
 
