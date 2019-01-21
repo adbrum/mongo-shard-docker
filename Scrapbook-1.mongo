@@ -31,8 +31,11 @@ db.getCollection('movies').aggregate([
         localField: 'title',
         foreignField: 'movieId',
         as: 'movie_',
-        }
-    }
+        },
+    },
+    {$project: {
+        'movie_': 0,
+    }}
 ]).pretty()
 
 //Informar como o filme está etiquetado
@@ -50,12 +53,12 @@ db.tags.aggregate([
         as: 'tag_',
         }
     },
-    {
+    /*{
       $unwind: "$tag"
-   }
+   }*/
 ]).pretty()
 
-/*db.getCollection('tags').aggregate([
+db.tags.aggregate([
     { $limit : 10 },
      {$project: {
         _id: 0,
@@ -73,7 +76,7 @@ db.tags.aggregate([
             as: "tag_ordem"
         }
     }
-]).pretty()*/
+]).pretty()
 
 //Saber Nome do filme e seu genero
 db.movies.aggregate([
@@ -87,18 +90,23 @@ db.movies.aggregate([
         from: 'tags',
         localField: 'title',
         foreignField: 'movieId',
-        as: 'movie_',
+        as: 'movie_data',
         }
-    }
+    },
+    {$project: {
+        'movie_data': 0,
+    }}
 ]).pretty()
 
 //Gerar o rating dos filmes
 db.ratings.aggregate([
-    //{ $limit : 100 },// Limitar
-   {$project: {
+    { $limit : 10 },// Limitar
+   {
+       $project: {
         _id: 0,
         userId: 0
-    }},
+    }
+    },
     {
         $lookup: {
         from: 'tags',
@@ -107,7 +115,7 @@ db.ratings.aggregate([
         as: 'tag',
         }
     },
-    { $out : "rating_movies" } 
+    { $out : "rating_movies" }, 
 ]).pretty()
 
 //Saber o rating dos filmes
@@ -132,14 +140,15 @@ db.rating_movies.aggregate([
 ]).pretty()
 
 
-//Saber qual a classificação do filme
+//Saber qual a classificação do filme de acordo com o utilizador
 db.ratings.aggregate([
-    {$project: {
+    //{$match: {userId: 1}},
+    /*{$project: {
         _id: 0,
         userId: 0,
         movieId: 0,
         timestamp: 0
-    }},
+    }},*/
     {
         $lookup: {
         from: 'movies',
@@ -147,14 +156,17 @@ db.ratings.aggregate([
         foreignField: 'title',
         as: 'title',
         }
-    }
+    },
+    {$project: {
+        'title': 0,
+    }}
 ]).pretty()
 
 db.rating_movies.aggregate([
     //{$match: {movieId: 3893}},
     ///{$group: {_id: "$movieId", total: {$avg: "$rating"}}},
     {$project: {
-        _id: 0,
+        //_id: 0,
         "tag._id": 0,
         "tag.movieId": 0,
         "tag.timestamp": 0,
@@ -172,10 +184,10 @@ db.rating_movies.aggregate([
 
 //Mostrar dados dos filmes no IMDB
 db.links.aggregate([
-    { $limit : 10 },
-    {$project: {
+    //{ $limit : 10 },
+    /*{$project: {
         _id: 0,
-    }},
+    }},*/
     {
         $lookup: {
         from: 'movies',
@@ -183,19 +195,104 @@ db.links.aggregate([
         foreignField: 'movieId',
         as: 'movie_data',
         }
-    },
+    }
+    /*,
     {$project: {
         'movie_data._id': 0,
         'movie_data.movieId': 0,
-    }}
+    }}*/
 ]).pretty()
 
+
+//Verifica máximo, mínimo e média da classificação
+db.ratings.aggregate([
+    //{ $limit : 1000 },
+    //{$match: {movieId: 1}},
+    {
+        $group: {
+            _id: 0,
+            minimo:{$min:"$rating"},
+            maximo:{$max:"$rating"},
+            media:{$avg:"$rating"},
+           // dpadrao:{$stdDevSamp:"$rating"}
+        }
+    },
+    { $out : "rating_AVG" },
+
+]).pretty()
+
+
+/*var mapFunction1 = function() {
+                       emit(this.movieId, this.rating);
+                   };
+
+
+var reduceFunction1 = function(keyCustId, valuesPrices) {
+                          return Array.sum(valuesPrices);
+                      };
+
+                    db.ratings.mapReduce(
+                     mapFunction1,
+                     reduceFunction1,
+                     { out: "map_reduce_example" }
+                   )
+*/
 //Teste Reduce
-db.tags.mapReduce(
-   function() { emit(this.timestamp,1); }, 
-	
-   function(key, values) {return Array.sum(values)}, {  
-      query:{movieId:"1"},  
-      out:"post_total" 
+db.ratings.mapReduce(
+   function() { emit(this.movieId, this.rating );},  //map function
+   function(key,values){ return Array.avg( values ) }, 
+   {   //reduce function
+      out: "classificacao_avg",
+      //query: {movieId: 2},
+      /*sort: document,
+      limit: number*/
    }
 )
+
+db.ratings.mapReduce(
+   function() { emit(this.rating, 1 );},  //map function
+   function(key,values){ return Array.sum( values ) }, 
+   {   //reduce function
+      out: "classificacao",
+      query: {rating: 0.5},
+   }
+)
+
+db.movies.mapReduce( function() {emit(this._ide,1); }, function(key,
+value) {return Array.count(values)}, { query:{od:126}, out:
+"post_total" } )
+
+
+
+
+
+
+
+function map() {emit (this.movieId, this.rating)}
+
+function reduce(key, values) {return Array.avg(values)}
+
+db.ratings.mapReduce(map, reduce, { 
+    out: "rating", 
+    query: {movieId: 2},
+    })
+
+
+/*
+db.ratings.mapReduce(
+function map() {emit (this.movieId, this.rating)},
+function reduce(key, values) {return Array.avg(values)},
+map, reduce, 
+{ out: "collection", 
+ query: movieId: 29}
+)
+
+*/
+
+
+/**
+sh.enableSharding("movies")
+db.movies.createIndex( { _id: 1 } )
+db.movies.createIndex( { movie: 1 }, {unique: false} )
+sh.shardCollection("movies.1", {movie:1}, false)
+ */
