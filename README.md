@@ -12,9 +12,9 @@ mongoDB Documentation [https://docs.mongodb.com/manual/tutorial/convert-replica-
 
 * Config Server (3 member replica set): `config01`,`config02`,`config03`
 * 3 Shards (each a 2 member replica set):
-	* `shard01a`,`shard01b`
-	* `shard02a`,`shard02b`
-	* `shard03a`,`shard03b`
+	* `shard01a`,`shard01b`,`shard01c`
+	* `shard02a`,`shard02b`,`shard02c`
+	* `shard03a`,`shard03b`,`shard03c`
 * 1 Router (mongos): `router`
 * (TODO): DB data persistence using docker data volumes
 
