@@ -151,7 +151,7 @@ db.ratings.aggregate([
     }},*/
     {
         $lookup: {
-        from: 'movies',
+        from: 'cinema.movies',
         localField: 'rating',
         foreignField: 'title',
         as: 'title',
@@ -190,7 +190,7 @@ db.links.aggregate([
     }},*/
     {
         $lookup: {
-        from: 'movies',
+        from: 'cinema.movies',
         localField: 'movieId',
         foreignField: 'movieId',
         as: 'movie_data',
@@ -206,7 +206,7 @@ db.links.aggregate([
 
 //Verifica máximo, mínimo e média da classificação
 db.ratings.aggregate([
-    //{ $limit : 1000 },
+    { $limit : 1000 },
     //{$match: {movieId: 1}},
     {
         $group: {
