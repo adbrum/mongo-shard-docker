@@ -10,11 +10,4 @@ sh.setBalancerState( true )
 sh.setBalancerState(true)
 db.adminCommand( { balancerStart: 1 } )
 
-//Disable the Balancer
-sh.stopBalancer()
-sh.getBalancerState()
-
-//To disable the balancer from a driver, use the balancerStop 
-//command against the admin database, as in the following:
-db.adminCommand( { balancerStop: 1 } )
 
