@@ -1,4 +1,5 @@
-db.createUser(
+admin = db.getSiblingDB("admin")
+admin.createUser(
   {
     user: "admin",
     pwd: "admin",
@@ -10,7 +11,6 @@ db.createUser(
   {
     user: "teste01",
     pwd: "123",
-    
     roles: [{"role":"readAnyDatabase","db":"admin"}],
   }
 )
